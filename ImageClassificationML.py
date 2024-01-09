@@ -43,6 +43,8 @@ print(f"Deleted {num_skipped} files due to corruption or unformatted content")
 
 imageSize = (180,180)
 batchSize = 128
+columns = 5
+rows = 2
 
 #Seperate Training set and Testing Validation
 train_ds, val_ds = keras.utils.image_dataset_from_directory(
@@ -68,3 +70,37 @@ for images, labels in train_ds.take(1):
         plt.title(int(labels[i]))
         plt.axis("off")
         plt.show()
+        
+        
+#Apply transformations to training images to help expose
+#Model to different aspects of training data while slowing down overfitting
+
+data_augmentation_layers = [
+    layers.RandomFlip("horizontal"),
+    layers.RandomRotation(0.1),
+]
+
+def data_augmentation(images):
+    for layer in data_augmentation_layers:
+        images = layer(images)
+        
+    return images
+
+#visualize the new augmented images
+for images, _ in train_ds.take(1):
+    for i in range(1, columns*rows + 1):
+        augmented_images= data_augmentation(images)
+        ax = plt.subplot(rows,columns,i)
+        plt.imshow(np.array(augmented_images[0]).astype("uint8"))
+        plt.axis("off")
+    plt.show()    
+    
+#will standarize values to be in the [0,1] by using the rescaling
+#layer at the start of the model
+
+#Preprocess Data
+
+#map function applies the function to every element in array (in this case training data)
+augmented_train_ds = train_ds.map(
+    lambda x,y: (data_augmentation(x, training=True),y)
+)
