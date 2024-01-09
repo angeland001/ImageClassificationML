@@ -11,19 +11,9 @@ import matplotlib.pyplot as plt
 
 num_skipped = 0
 
-folder_List = ["/Users/andresangel/Desktop/kagglecatsanddogs_5340/PetImages/Cat","/Users/andresangel/Desktop/kagglecatsanddogs_5340/PetImages/Dog"]
-folder_Counters = [0,0]
-
-for folder_index, folder_path in enumerate(folder_List):
-    for _,_, files in os.walk(folder_path):
-        folder_Counters[folder_index] += len(files)
-
-NumOfCatImages = folder_Counters[0]
-NumOfDogImages = folder_Counters[1]
-
 #Loop through respective files in each folder
 for folder_Name in ("Cat","Dog"):
-    folder_Path = os.path.join("/Users/andresangel/Desktop/kagglecatsanddogs_5340/PetImages", folder_Name)
+    folder_Path = os.path.join(r"C:\Users\angel\Desktop\kagglecatsanddogs_5340\PetImages", folder_Name)
 
     #Loops through folder
 
@@ -46,11 +36,35 @@ for folder_Name in ("Cat","Dog"):
             num_skipped += 1
             os.remove(filePath)
 
-    print("Dog Files in total: " + str(NumOfDogImages))
-    print("Cat Files in total: " + str(NumOfCatImages))      
+     
 
 print(f"Deleted {num_skipped} files due to corruption or unformatted content")
 
 
+imageSize = (180,180)
+batchSize = 128
 
+#Seperate Training set and Testing Validation
+train_ds, val_ds = keras.utils.image_dataset_from_directory(
+    r"C:\Users\angel\Desktop\kagglecatsanddogs_5340\PetImages",
+    # Optional float between 0 and 1, fraction of data to reserve for validation.
+    # 20 Percent for Testing/Labels
+    validation_split = 0.2,
+    
+    # When subset="both", the utility returns a tuple of two datasets 
+    # (the training and validation datasets respectively).
+    
+    subset = "both",
+    seed=1337,
+    image_size = imageSize,
+    batch_size = batchSize,
+)
 
+plt.figure(figsize=(8,8))
+for images, labels in train_ds.take(1):
+    for i in range(9):
+        ax = plt.subplot(3,3,i+1)
+        plt.imshow(np.array(images[i]).astype("uint8"))
+        plt.title(int(labels[i]))
+        plt.axis("off")
+        plt.show()
